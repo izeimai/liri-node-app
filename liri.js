@@ -3,10 +3,9 @@ require("dotenv").config();
 var keys = require("./keys.js");
 var axios = require("axios");
 var moment = require("moment");
+var Spotify = require("node-spotify-api");
 var fs = require("fs");
-
-//Keys can be retrieved with this:
-//var spotify = new Spotify(keys.spotify);
+var spotify = new Spotify(keys.spotify);
 
 // Retrieve the actions and value from the command-line input
 var action = process.argv[2];
@@ -87,17 +86,39 @@ function spotifyThisSong() {
 
     // Default to "The Sign" by Ace of Base if no song is provided
     if (value === undefined) {
-        console.log("No Song provided");
-        value = "The Sign";
-    }
+        console.log("No Song provided so showing information on default song");
+        // There are many songs with the track name "The Sign" so it's easier to just use the spotify ID
+        // 0hrBpAOgrt8RXigk83LLNE to the exact end point
+        spotify
+            .request('https://api.spotify.com/v1/tracks/0hrBpAOgrt8RXigk83LLNE')
+            .then(function (data) {
+                console.log("Artist name: " + data.artists[0].name);
+                console.log("Song name: " + data.name);
+                console.log("Preview link of song: " + data.preview_url);
+                console.log("Album name: " + data.album.name)
+            })
+            .catch(function (err) {
+                console.error('Error occurred: ' + err);
+            });
+    } else {
+        spotify
+            .search({ type: 'track', query: value })
+            .then(function (response) {
+                console.log("Artist name: " + response.tracks.items[0].artists[0].name);
+                // Artist(s)
+                console.log("Song name: " + response.tracks.items[0].name);
+                // The song's name
+                console.log("Preview link of song: " + response.tracks.items[0].preview_url);
+                // A preview link of the song from Spotify
+                console.log("Album name: " + response.tracks.items[0].album.name);
+                // The album that the song is from
 
-    // Artist(s)
-    // The song's name
-    // A preview link of the song from Spotify
-    // The album that the song is from
-
-
-}
+            })
+            .catch(function (err) {
+                console.log('Error occurred: ' + err);
+            });
+    };
+};
 
 function movieThis() {
 
