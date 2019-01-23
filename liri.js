@@ -47,8 +47,6 @@ function concertThis() {
     axios.get(queryURL)
         .then(function (response) {
             // for loop to console.log out results from multiple events
-            console.log("Got the response back");
-
             for (var i = 0; i < response.data.length; i++) {
                 // Name of the venue
                 console.log(response.data[i].venue.name);
@@ -88,7 +86,7 @@ function spotifyThisSong() {
     if (value === undefined) {
         console.log("No Song provided so showing information on default song");
         // There are many songs with the track name "The Sign" so it's easier to just use the spotify ID
-        // 0hrBpAOgrt8RXigk83LLNE to the exact end point
+        // 0hrBpAOgrt8RXigk83LLNE to the exact end point so only one song shows up
         spotify
             .request('https://api.spotify.com/v1/tracks/0hrBpAOgrt8RXigk83LLNE')
             .then(function (data) {
@@ -102,17 +100,28 @@ function spotifyThisSong() {
             });
     } else {
         spotify
-            .search({ type: 'track', query: value })
+            .search({ type: 'track', query: "\"" + value + "\"" }) // search for exact match only
             .then(function (response) {
-                console.log("Artist name: " + response.tracks.items[0].artists[0].name);
-                // Artist(s)
-                console.log("Song name: " + response.tracks.items[0].name);
-                // The song's name
-                console.log("Preview link of song: " + response.tracks.items[0].preview_url);
-                // A preview link of the song from Spotify
-                console.log("Album name: " + response.tracks.items[0].album.name);
-                // The album that the song is from
+                for (var i = 0; i < response.tracks.items.length; i++) {
+                    var respItem = response.tracks.items[i];
 
+                    if (respItem.artists.length > 1) { // multiple artists will be separated by commas
+                        var artistList = respItem.artists[0].name; // Add the first artist's name
+                        for (var j = 1; j < respItem.artists.length; j++) { // then follow with a comma then the subsequent artist name
+                            // Artist(s)
+                            artistList +=  ", " + respItem.artists[j].name;
+                        };
+                        console.log("Artist name: " + artistList);
+                    } else {
+                        console.log("Artist name: " + respItem.artists[0].name); // only one Artist name
+                    }
+                    // The song's name
+                    console.log("Song name: " + respItem.name);
+                    // A preview link of the song from Spotify
+                    console.log("Preview link of song: " + respItem.preview_url);
+                    // The album that the song is from
+                    console.log("Album name: " + respItem.album.name + " \n");
+                };
             })
             .catch(function (err) {
                 console.log('Error occurred: ' + err);
@@ -120,8 +129,8 @@ function spotifyThisSong() {
     };
 };
 
+// Queries OMDB for movie information using the title as the search term
 function movieThis() {
-
     if (value === undefined) {
         // Default to "Mr. Nobody" if no movie is provided
         console.log("No movie title provided! Displaying default movie information");
