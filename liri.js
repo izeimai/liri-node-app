@@ -12,23 +12,26 @@ var action = process.argv[2];
 var value = process.argv[3];
 
 // switch-case statement for the entered command to determine which function runs
-switch (action) {
-    case "concert-this":
-        concertThis();
-        break;
+// encased with function name "executeAction" because I want to call it again for do-what=it=says action
+function executeAction() {
+    switch (action) {
+        case "concert-this":
+            concertThis();
+            break;
 
-    case "spotify-this-song":
-        spotifyThisSong();
-        break;
+        case "spotify-this-song":
+            spotifyThisSong();
+            break;
 
-    case "movie-this":
-        movieThis();
-        break;
+        case "movie-this":
+            movieThis();
+            break;
 
-    case "do-what-it-says":
-        doWhatItSays();
-        break;
-}
+        case "do-what-it-says":
+            doWhatItSays();
+            break;
+    };
+};
 
 // Searches the Bands in Town Artist Events API to return concert info on each event
 function concertThis() {
@@ -93,23 +96,23 @@ function spotifyThisSong() {
                 console.log("Artist name: " + data.artists[0].name);
                 console.log("Song name: " + data.name);
                 console.log("Preview link of song: " + data.preview_url);
-                console.log("Album name: " + data.album.name)
+                console.log("Album name: " + data.album.name + " \n")
             })
             .catch(function (err) {
                 console.error('Error occurred: ' + err);
             });
     } else {
         spotify
-            .search({ type: 'track', query: "\"" + value + "\"" }) // search for exact match only
+            .search({ type: 'track', query: "\"" + value + "\"" }) // search for exact match only with double quotation marks
             .then(function (response) {
-                for (var i = 0; i < response.tracks.items.length; i++) {
+                for (var i = 0; i < response.tracks.items.length; i++) { // loops through each song
                     var respItem = response.tracks.items[i];
 
-                    if (respItem.artists.length > 1) { // multiple artists will be separated by commas
+                    if (respItem.artists.length > 1) { // multiple artists for the song
                         var artistList = respItem.artists[0].name; // Add the first artist's name
                         for (var j = 1; j < respItem.artists.length; j++) { // then follow with a comma then the subsequent artist name
                             // Artist(s)
-                            artistList +=  ", " + respItem.artists[j].name;
+                            artistList += ", " + respItem.artists[j].name;
                         };
                         console.log("Artist name: " + artistList);
                     } else {
@@ -117,8 +120,12 @@ function spotifyThisSong() {
                     }
                     // The song's name
                     console.log("Song name: " + respItem.name);
-                    // A preview link of the song from Spotify
-                    console.log("Preview link of song: " + respItem.preview_url);
+                    // A preview link of the song from Spotify (there are many cases where there is no preview, null)
+                    if (respItem.preview_url === null) { // Learned that null is not a string
+                        console.log("No preview of song available");
+                    } else {
+                        console.log("Preview link of song: " + respItem.preview_url);
+                    }
                     // The album that the song is from
                     console.log("Album name: " + respItem.album.name + " \n");
                 };
@@ -151,7 +158,7 @@ function movieThis() {
             console.log("Country: " + response.data.Country);
             console.log("Language of movie: " + response.data.Language);
             console.log("Plot of the movie: " + response.data.Plot);
-            console.log("Actors in the movie: " + response.data.Actors);
+            console.log("Actors in the movie: " + response.data.Actors + " \n");
         })
         .catch(function (error) {
             // error message handler used in class exercise
@@ -171,4 +178,19 @@ function movieThis() {
 
 function doWhatItSays() {
     console.log("dowhatitsays");
-}
+    // Read the contents of the random.txt file
+    fs.readFile("random.txt", "utf8", function (error, data) {
+        if (error) {
+            return console.log(error);
+        }
+        var fileContents = data.split(",");
+        action = fileContents[0];
+        value = fileContents[1];
+        executeAction();
+    });
+
+}; // close function
+
+
+// Run the switch statement
+executeAction();
