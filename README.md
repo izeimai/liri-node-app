@@ -1,6 +1,8 @@
 # LIRI
 "Language Interpretation and Recognition Interface" is a command line Node app
 
+## Video walk through: https://drive.google.com/file/d/1qi5hidYnnO6Ayq0IXK8NygZq_hFfOKfP/view
+
 *What does this app do?*
 User can access information for concerts, songs and movies through command-line terminal inputs to access APIs (Bands in Town, Spotify and OMDB). 
 There are four different search options:
